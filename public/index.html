@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Management</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <div>
+        <h1>School Management</h1>
+        <p>Secure school administration with login, role-based access, and CSV import/export.</p>
+      </div>
+      <img src="images/logo.svg" alt="School logo" class="logo" />
+    </div>
+    <nav class="site-nav" id="site-nav">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#students">Students</a>
+      <a href="#teachers">Teachers</a>
+      <a href="#classes">Classes</a>
+      <a href="#enrollments">Enrollments</a>
+      <a href="#attendance">Attendance</a>
+      <a href="#grades">Grades</a>
+      <a href="#export">Export</a>
+      <a href="#import">Import</a>
+    </nav>
+    <div class="hero-features">
+      <article class="feature-card">
+        <img src="images/students.svg" alt="Students" />
+        <div>
+          <h3>Students</h3>
+          <p>Quickly manage student records, grades, and attendance.</p>
+        </div>
+      </article>
+      <article class="feature-card">
+        <img src="images/teachers.svg" alt="Teachers" />
+        <div>
+          <h3>Teachers</h3>
+          <p>Assign teachers to classes and keep schedules organized.</p>
+        </div>
+      </article>
+      <article class="feature-card">
+        <img src="images/classes.svg" alt="Classes" />
+        <div>
+          <h3>Classes</h3>
+          <p>Track classrooms, subjects, and student enrollment status.</p>
+        </div>
+      </article>
+      <article class="feature-card">
+        <img src="images/attendance.svg" alt="Attendance" />
+        <div>
+          <h3>Attendance</h3>
+          <p>Record attendance with fast check-in tools.</p>
+        </div>
+      </article>
+    </div>
+  </header>
+  <main>
+    <section class="card" id="login-card">
+      <h2>Login</h2>
+      <p>Use default admin credentials: <strong>admin</strong> / <strong>admin123</strong>. Parent accounts can also log in once created.</p>
+      <form id="login-form">
+        <input name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <div id="message" class="message"></div>
+    </section>
+
+    <section class="page hidden" id="page-dashboard">
+      <div class="card">
+        <div class="toolbar">
+          <div>
+            <div id="welcome-text">Welcome back!</div>
+            <div id="role-text"></div>
+          </div>
+          <button id="logout-button" type="button">Logout</button>
+        </div>
+
+        <div class="note" id="access-note">
+          <p>Admins can manage students, teachers, classes, and enrollments; they can also import/export CSV files.</p>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card small-card">
+          <h3>Students</h3>
+          <p>Manage student profiles, grades, and attendance.</p>
+        </div>
+        <div class="card small-card">
+          <h3>Teachers</h3>
+          <p>Assign teachers to classes and keep rosters organized.</p>
+        </div>
+        <div class="card small-card">
+          <h3>Classes</h3>
+          <p>Track rooms, schedules, and class assignments.</p>
+        </div>
+        <div class="card small-card">
+          <h3>Attendance</h3>
+          <p>View the latest attendance and create new entries.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-students">
+      <div class="card" id="students-section">
+        <h2>Students</h2>
+        <form id="student-form">
+          <input name="first_name" placeholder="First name" required />
+          <input name="last_name" placeholder="Last name" required />
+          <input name="grade" placeholder="Grade" />
+          <button type="submit">Add Student</button>
+        </form>
+        <div id="students-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-teachers">
+      <div class="card" id="teachers-section">
+        <h2>Teachers</h2>
+        <form id="teacher-form">
+          <input name="first_name" placeholder="First name" required />
+          <input name="last_name" placeholder="Last name" required />
+          <input name="subject" placeholder="Subject" />
+          <button type="submit">Add Teacher</button>
+        </form>
+        <div id="teachers-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-classes">
+      <div class="card" id="classes-section">
+        <h2>Classes</h2>
+        <form id="class-form">
+          <input name="name" placeholder="Class name" required />
+          <input name="room" placeholder="Room" />
+          <select name="teacher_id" id="teacher-select">
+            <option value="">Assign teacher</option>
+          </select>
+          <button type="submit">Add Class</button>
+        </form>
+        <div id="classes-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-enrollments">
+      <div class="card" id="enrollments-section">
+        <h2>Enrollments</h2>
+        <form id="enrollment-form">
+          <select name="student_id" id="student-select"></select>
+          <select name="class_id" id="class-select"></select>
+          <button type="submit">Enroll Student</button>
+        </form>
+        <div id="enrollments-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-attendance">
+      <div class="card" id="attendance-section">
+        <h2>Attendance</h2>
+        <form id="attendance-form" class="small-form">
+          <select name="student_id" id="attendance-student-select"></select>
+          <select name="class_id" id="attendance-class-select"></select>
+          <input name="date" type="date" required />
+          <select name="status" required>
+            <option value="">Status</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+          </select>
+          <input name="notes" placeholder="Notes" />
+          <button type="submit">Record Attendance</button>
+        </form>
+        <div id="attendance-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-grades">
+      <div class="card" id="grades-section">
+        <h2>Grades</h2>
+        <form id="grade-form" class="small-form">
+          <select name="student_id" id="grade-student-select"></select>
+          <select name="class_id" id="grade-class-select"></select>
+          <input name="assignment" placeholder="Assignment" required />
+          <input name="score" type="number" placeholder="Score" />
+          <input name="max_score" type="number" placeholder="Max score" />
+          <input name="date" type="date" />
+          <input name="comments" placeholder="Comments" />
+          <button type="submit">Add Grade</button>
+        </form>
+        <div id="grades-list"></div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-export">
+      <div class="card" id="export-card">
+        <h2>Data export</h2>
+        <div class="button-row">
+          <button type="button" data-type="students">Export students</button>
+          <button type="button" data-type="teachers">Export teachers</button>
+          <button type="button" data-type="classes">Export classes</button>
+          <button type="button" data-type="enrollments">Export enrollments</button>
+          <button type="button" data-type="attendance">Export attendance</button>
+          <button type="button" data-type="grades">Export grades</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-import">
+      <div class="card" id="import-card">
+        <h2>CSV import</h2>
+        <form id="import-form">
+          <select name="type" required>
+            <option value="">Select import type</option>
+            <option value="students">Students</option>
+            <option value="teachers">Teachers</option>
+            <option value="classes">Classes</option>
+            <option value="enrollments">Enrollments</option>
+            <option value="attendance">Attendance</option>
+            <option value="grades">Grades</option>
+          </select>
+          <input type="file" name="file" accept=".csv" required />
+          <button type="submit">Upload CSV</button>
+        </form>
+        <p class="hint">Example rows: students: first_name,last_name,grade; attendance: student_id,class_id,date,status,notes</p>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+
+  <div id="student-modal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button id="student-modal-close" class="modal-close" aria-label="Close">×</button>
+      <div id="student-modal-body"></div>
+    </div>
+  </div>
+</body>
+</html>

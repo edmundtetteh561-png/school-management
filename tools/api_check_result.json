@@ -1,0 +1,43 @@
+{
+  "steps": [
+    {
+      "name": "login",
+      "status": 200,
+      "body": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJ0ZWFjaGVyX2lkIjpudWxsLCJzdHVkZW50X2lkIjpudWxsLCJpYXQiOjE3ODAzODM2MDQsImV4cCI6MTc4MDQxMjQwNH0.5NCxgsg2hLNmPIE1ctIXiwY_JY6wsHRo5XpaUO98ObE",
+        "username": "admin",
+        "role": "admin"
+      }
+    },
+    {
+      "name": "create_student",
+      "status": 200,
+      "body": {
+        "id": 14,
+        "first_name": "Tmp",
+        "last_name": "Del",
+        "grade": "9"
+      }
+    },
+    {
+      "name": "edit_student",
+      "id": 14,
+      "status": 200,
+      "body": {
+        "id": 14,
+        "first_name": "TmpEdit",
+        "last_name": "Del",
+        "grade": "10"
+      }
+    },
+    {
+      "name": "delete_student",
+      "id": 14,
+      "status": 200,
+      "body": {
+        "id": 14
+      }
+    }
+  ],
+  "summary": "completed"
+}

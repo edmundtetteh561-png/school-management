@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: school-management
+    env: node
+    plan: starter
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        sync: false
