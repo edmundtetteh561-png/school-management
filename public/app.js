@@ -1018,6 +1018,8 @@ async function handleImport(event) {
 
 function wireForm(formId, apiPath, payloadBuilder) {
   const form = document.getElementById(formId);
+  if (!form) return;
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
