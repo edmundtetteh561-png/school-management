@@ -169,6 +169,28 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.edit-btn,
+.delete-btn {
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  border: none;
+}
+
+.edit-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.actions-th {
+  min-width: 150px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
