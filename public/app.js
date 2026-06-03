@@ -122,7 +122,7 @@ function renderLists() {
     { label: 'Student', key: 'student_name' }
   ]);
 
-  // Add admin edit buttons to tables (students, teachers, parent links)
+  // Admin can edit and delete all management tables.
   if (state.auth.role === 'admin') {
     addEditButtons('students-list', openStudentEditModal, 'students');
     addEditButtons('teachers-list', openTeacherEditModal, 'teachers');
@@ -130,6 +130,10 @@ function renderLists() {
     addEditButtons('enrollments-list', openInlineEditEnrollment, 'enrollments');
     addEditButtons('users-list', openInlineEditUser, 'users');
     addEditButtons('parent-links-list', openParentLinkEditModal, 'parent-students');
+  }
+
+  // Teachers may edit and delete attendance and grades for their classes.
+  if (state.auth.role === 'admin' || state.auth.role === 'teacher') {
     addEditButtons('attendance-list', openEditAttendanceModal, 'attendance');
     addEditButtons('grades-list', openEditGradeModal, 'grades');
   }
