@@ -72,6 +72,15 @@ function teacherOwnsClass(user, classId, callback) {
   });
 }
 
+function teacherHasStudent(user, studentId, callback) {
+  if (!user.teacher_id) return callback(null, false);
+  const sql = `SELECT 1 FROM enrollments JOIN classes ON enrollments.class_id = classes.id WHERE enrollments.student_id = ? AND classes.teacher_id = ? LIMIT 1`;
+  db.get(sql, [studentId, user.teacher_id], (err, row) => {
+    if (err) return callback(err);
+    callback(null, Boolean(row));
+  });
+}
+
 function parseCsv(text) {
   const lines = text
     .split(/\r?\n/)
@@ -437,9 +446,32 @@ app.post('/api/students', requireAuth, requireRole('admin'), (req, res) => {
   });
 });
 
-app.put('/api/students/:id', requireAuth, requireRole('admin'), (req, res) => {
+app.put('/api/students/:id', requireAuth, (req, res) => {
   const { id } = req.params;
   const { first_name, last_name, grade } = req.body;
+
+  // Admins may update any student; teachers may update students in their classes
+  if (req.user.role !== 'admin') {
+    if (req.user.role !== 'teacher') {
+      return res.status(403).json({ error: 'Requires admin or teacher role' });
+    }
+
+    teacherHasStudent(req.user, id, (err, has) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!has) return res.status(403).json({ error: 'Teacher may only edit students in their classes' });
+
+      db.run(
+        'UPDATE students SET first_name = ?, last_name = ?, grade = ? WHERE id = ?',
+        [first_name, last_name, grade, id],
+        function (err) {
+          if (err) return res.status(500).json({ error: err.message });
+          res.json({ id: Number(id), first_name, last_name, grade });
+        }
+      );
+    });
+    return;
+  }
+
   db.run(
     'UPDATE students SET first_name = ?, last_name = ?, grade = ? WHERE id = ?',
     [first_name, last_name, grade, id],
@@ -466,9 +498,17 @@ app.post('/api/teachers', requireAuth, requireRole('admin'), (req, res) => {
   });
 });
 
-app.put('/api/teachers/:id', requireAuth, requireRole('admin'), (req, res) => {
+app.put('/api/teachers/:id', requireAuth, (req, res) => {
   const { id } = req.params;
   const { first_name, last_name, subject } = req.body;
+
+  // Admins may update any teacher; teachers may update their own record
+  if (req.user.role !== 'admin') {
+    if (req.user.role !== 'teacher' || String(req.user.teacher_id) !== String(id)) {
+      return res.status(403).json({ error: 'Requires admin or owner teacher' });
+    }
+  }
+
   db.run(
     'UPDATE teachers SET first_name = ?, last_name = ?, subject = ? WHERE id = ?',
     [first_name, last_name, subject, id],
@@ -490,12 +530,31 @@ app.get('/api/classes', (req, res) => {
   });
 });
 
-app.delete('/api/students/:id', requireAuth, requireRole('admin'), (req, res) => {
+app.delete('/api/students/:id', requireAuth, (req, res) => {
   const { id } = req.params;
-  db.run('DELETE FROM students WHERE id = ?', [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: Number(id) });
-  });
+
+  // Admin can delete any student; teacher can delete a student only if that student is in one of their classes
+  if (req.user.role === 'admin') {
+    db.run('DELETE FROM students WHERE id = ?', [id], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: Number(id) });
+    });
+    return;
+  }
+
+  if (req.user.role === 'teacher') {
+    teacherHasStudent(req.user, id, (err, has) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!has) return res.status(403).json({ error: 'Teacher may only delete students in their classes' });
+      db.run('DELETE FROM students WHERE id = ?', [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: Number(id) });
+      });
+    });
+    return;
+  }
+
+  res.status(403).json({ error: 'Access denied' });
 });
 
 app.delete('/api/teachers/:id', requireAuth, requireRole('admin'), (req, res) => {

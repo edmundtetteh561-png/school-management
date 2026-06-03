@@ -138,50 +138,31 @@ function renderLists() {
     addEditButtons('grades-list', openEditGradeModal, 'grades');
   }
 
-  // Ensure action headers and guidance exist for admin/teacher roles
-  (function ensureActionHints() {
-    const role = state.auth.role;
-    if (!(role === 'admin' || role === 'teacher')) return;
-    const lists = ['attendance-list', 'grades-list', 'students-list', 'teachers-list', 'enrollments-list'];
-    lists.forEach((id) => {
-      const container = document.getElementById(id);
-      if (!container) return;
-      const table = container.querySelector('table');
-      const hintId = `${id}-empty-hint`;
+  // Teachers: allow editing of their own teacher row, and editing/deleting of students in their classes
+  if (state.auth.role === 'teacher') {
+    const teacherId = state.auth.teacher_id;
 
-      // Remove stale hint if table now exists
-      const existingHint = document.getElementById(hintId);
-      if (table) {
-        if (existingHint) existingHint.remove();
+    // Teachers list: allow teacher to edit their own record
+    const teachersTable = document.querySelector('#teachers-list table');
+    if (teachersTable) {
+      ensureActionsHeader(teachersTable);
+      const tr = teachersTable.querySelector(`tbody tr[data-id="${teacherId}"]`);
+      if (tr) addActionsToRow(tr, { canEdit: true, canDelete: false, onEdit: openTeacherEditModal, endpoint: 'teachers' });
+    }
 
-        const theadRow = table.querySelector('thead tr');
-        if (theadRow && !theadRow.querySelector('.actions-th')) {
-          const th = document.createElement('th');
-          th.textContent = 'Actions';
-          th.className = 'actions-th';
-          theadRow.appendChild(th);
+    // Students list: find students enrolled in classes taught by this teacher
+    const classIds = state.classes.filter((c) => String(c.teacher_id) === String(teacherId)).map((c) => Number(c.id));
+    const studentIds = state.enrollments.filter((e) => classIds.includes(Number(e.class_id))).map((e) => String(e.student_id));
+    const studentsTable = document.querySelector('#students-list table');
+    if (studentsTable && studentIds.length) {
+      ensureActionsHeader(studentsTable);
+      studentsTable.querySelectorAll('tbody tr').forEach((tr) => {
+        if (studentIds.includes(tr.dataset.id)) {
+          addActionsToRow(tr, { canEdit: true, canDelete: true, onEdit: openStudentEditModal, endpoint: 'students' });
         }
-
-        // Ensure each row has a placeholder cell for actions so layout is consistent
-        table.querySelectorAll('tbody tr').forEach((tr) => {
-          if (!tr.querySelector('td.actions-td')) {
-            const td = document.createElement('td');
-            td.className = 'actions-td';
-            tr.appendChild(td);
-          }
-        });
-      } else {
-        // If no records yet, show a small hint so users know edit/delete will appear
-        if (!existingHint) {
-          const p = document.createElement('p');
-          p.id = hintId;
-          p.className = 'hint';
-          p.textContent = 'No records yet. Add entries to enable Edit/Delete controls here.';
-          container.appendChild(p);
-        }
-      }
-    });
-  })();
+      });
+    }
+  }
 
   // render parent-specific simple list for parents
   const myStudentsEl = document.getElementById('my-students-list');
@@ -398,6 +379,53 @@ function addEditButtons(listId, handler) {
       tr.appendChild(td);
     });
   }
+}
+
+function ensureActionsHeader(table) {
+  const theadRow = table.querySelector('thead tr');
+  if (theadRow && !theadRow.querySelector('.actions-th')) {
+    const th = document.createElement('th');
+    th.textContent = 'Actions';
+    th.className = 'actions-th';
+    theadRow.appendChild(th);
+  }
+}
+
+function addActionsToRow(tr, { canEdit = false, canDelete = false, onEdit = null, endpoint = null } = {}) {
+  if (!tr) return;
+  // prevent duplicate actions cell
+  if (tr.querySelector('td.actions-cell')) return;
+  const td = document.createElement('td');
+  td.className = 'actions-cell';
+
+  if (canEdit && typeof onEdit === 'function') {
+    const btn = document.createElement('button');
+    btn.textContent = 'Edit';
+    btn.className = 'edit-btn';
+    btn.addEventListener('click', (e) => { e.stopPropagation(); onEdit(tr.dataset.id); });
+    td.appendChild(btn);
+  }
+
+  if (canDelete && endpoint) {
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.className = 'delete-btn';
+    del.style.marginLeft = '8px';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm('Delete this record? This action cannot be undone.')) return;
+      try {
+        await authFetch(`/api/${endpoint}/${tr.dataset.id}`, { method: 'DELETE' });
+        setMessage('Deleted.', false);
+        await loadData();
+      } catch (err) {
+        setMessage(err.message);
+      }
+    });
+    td.appendChild(del);
+  }
+
+  tr.appendChild(td);
 }
 
 function enableRowEditing(tr, fields, onSave, onCancel) {
