@@ -728,50 +728,91 @@ function closeStudentModal() {
   if (backdrop) backdrop.onclick = null;
 }
 
+function getAccessiblePages(role) {
+  const pages = {
+    admin: ['dashboard', 'students', 'teachers', 'classes', 'enrollments', 'attendance', 'grades', 'export', 'import'],
+    teacher: ['dashboard', 'students', 'teachers', 'classes', 'enrollments', 'attendance', 'grades'],
+    parent: ['dashboard', 'students', 'attendance', 'grades'],
+    student: ['dashboard', 'attendance', 'grades']
+  };
+  return pages[role] || ['dashboard'];
+}
+
+function syncNavigation(role) {
+  const allowedPages = getAccessiblePages(role);
+  document.querySelectorAll('.site-nav a').forEach((link) => {
+    const page = link.getAttribute('href').slice(1);
+    link.classList.toggle('hidden', !allowedPages.includes(page));
+  });
+}
+
 function updateAuthUI() {
   const loginCard = document.getElementById('login-card');
   const dashboardPage = document.getElementById('page-dashboard');
   const welcomeText = document.getElementById('welcome-text');
   const roleText = document.getElementById('role-text');
-  const teacherArea = document.getElementById('teacher-area');
   const accessNote = document.getElementById('access-note');
+  const nav = document.getElementById('site-nav');
 
-  const isAdmin = state.auth.role === 'admin';
-  const isTeacher = state.auth.role === 'teacher';
-  const isParent = state.auth.role === 'parent';
-  const isStudent = state.auth.role === 'student';
+  const role = state.auth.role;
+  const isAdmin = role === 'admin';
+  const isTeacher = role === 'teacher';
+  const isParent = role === 'parent';
+  const isStudent = role === 'student';
   const isLoggedIn = Boolean(state.auth.token);
+  const allowedPages = getAccessiblePages(role);
 
   loginCard.classList.toggle('hidden', isLoggedIn);
+  nav.classList.toggle('hidden', !isLoggedIn);
   if (dashboardPage) dashboardPage.classList.toggle('hidden', !isLoggedIn);
-  if (teacherArea) teacherArea.classList.toggle('hidden', !(isAdmin || isTeacher));
+  syncNavigation(role);
+
+  const studentForm = document.getElementById('student-form');
+  const teacherForm = document.getElementById('teacher-form');
+  const classForm = document.getElementById('class-form');
+  const enrollmentForm = document.getElementById('enrollment-form');
+  const attendanceForm = document.getElementById('attendance-form');
+  const gradeForm = document.getElementById('grade-form');
+  const exportCard = document.getElementById('export-card');
+  const importCard = document.getElementById('import-card');
+
+  if (studentForm) studentForm.classList.toggle('hidden', !isAdmin);
+  if (teacherForm) teacherForm.classList.toggle('hidden', !isAdmin);
+  if (classForm) classForm.classList.toggle('hidden', !isAdmin);
+  if (enrollmentForm) enrollmentForm.classList.toggle('hidden', !isAdmin);
+  if (attendanceForm) attendanceForm.classList.toggle('hidden', !(isAdmin || isTeacher));
+  if (gradeForm) gradeForm.classList.toggle('hidden', !(isAdmin || isTeacher));
+  if (exportCard) exportCard.classList.toggle('hidden', !isAdmin);
+  if (importCard) importCard.classList.toggle('hidden', !isAdmin);
+
   const parentArea = document.getElementById('parent-area');
   if (parentArea) parentArea.classList.toggle('hidden', !isParent);
   const studentArea = document.getElementById('student-area');
   if (studentArea) studentArea.classList.toggle('hidden', !isStudent);
 
-  // For parent and student roles we present a compact view: hide the big lists
-  const attendanceCard = document.getElementById('attendance-list')?.closest('.card');
-  const gradesCard = document.getElementById('grades-list')?.closest('.card');
-  if (attendanceCard) attendanceCard.classList.toggle('hidden', isParent || isStudent);
-  if (gradesCard) gradesCard.classList.toggle('hidden', isParent || isStudent);
-
   if (isLoggedIn) {
     if (isAdmin) {
       accessNote.innerHTML = '<p>Admins can manage students, teachers, classes, enrollments, users, and parent links. Import/export is available.</p>';
     } else if (isTeacher) {
-      accessNote.innerHTML = '<p>Teachers can add attendance and grades for their classes. Export/import access is restricted.</p>';
+      accessNote.innerHTML = '<p>Teachers can view classes, take attendance, and add grades for their assigned courses.</p>';
     } else if (isParent) {
-      accessNote.innerHTML = '<p>Parents can view attendance and grade records for linked students.</p>';
+      accessNote.innerHTML = '<p>Parents can view linked student attendance and grades, and keep families up to date.</p>';
     } else if (isStudent) {
-      accessNote.innerHTML = '<p>Students can view their own attendance and grades.</p>';
+      accessNote.innerHTML = '<p>Students can view their own attendance and grade records.</p>';
     } else {
-      accessNote.innerHTML = '<p>Your access is limited to viewing school data.</p>';
+      accessNote.innerHTML = '<p>Your access is limited to school data.</p>';
     }
   }
 
   welcomeText.textContent = isLoggedIn ? `Hello, ${state.auth.username}` : 'Welcome back!';
-  roleText.textContent = isLoggedIn ? `Role: ${state.auth.role}` : '';
+  roleText.textContent = isLoggedIn ? `Role: ${role}` : '';
+
+  const currentPage = getCurrentPage();
+  if (!allowedPages.includes(currentPage)) {
+    setPage('dashboard');
+  } else if (isLoggedIn) {
+    setPage(currentPage);
+  }
 }
 
 function setAuth(auth) {
@@ -812,7 +853,8 @@ function wirePageNavigation() {
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const page = link.getAttribute('href').slice(1);
-      if (!state.auth.token) return;
+      const allowedPages = getAccessiblePages(state.auth.role);
+      if (!state.auth.token || !allowedPages.includes(page)) return;
       setPage(page);
       history.pushState(null, '', `#${page}`);
     });
@@ -820,7 +862,14 @@ function wirePageNavigation() {
 
   window.addEventListener('hashchange', () => {
     if (!state.auth.token) return;
-    setPage(getCurrentPage());
+    const currentPage = getCurrentPage();
+    const allowedPages = getAccessiblePages(state.auth.role);
+    if (!allowedPages.includes(currentPage)) {
+      setPage('dashboard');
+      history.replaceState(null, '', '#dashboard');
+      return;
+    }
+    setPage(currentPage);
   });
 }
 

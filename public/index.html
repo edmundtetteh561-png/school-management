@@ -60,7 +60,7 @@
   <main>
     <section class="card" id="login-card">
       <h2>Login</h2>
-      <p>Use default admin credentials: <strong>admin</strong> / <strong>(hidden)</strong>. Parent accounts can also log in once created.</p>
+      <p>Secure school access for admins, teachers, parents, and students. Enter your credentials to continue.</p>
       <form id="login-form">
         <input name="username" placeholder="Username" required />
         <input type="password" name="password" placeholder="Password" required />
@@ -82,6 +82,17 @@
         <div class="note" id="access-note">
           <p>Admins can manage students, teachers, classes, and enrollments; they can also import/export CSV files.</p>
         </div>
+
+        <div class="dashboard-hero">
+          <div class="dashboard-hero-copy">
+            <h2>Professional school administration for every role</h2>
+            <p>Give your school a polished, modern portal for students, teachers, parents, and administrators.</p>
+          </div>
+          <div class="dashboard-hero-image">
+            <img src="images/students.svg" alt="Student illustration" />
+            <img src="images/teachers.svg" alt="Teacher illustration" />
+          </div>
+        </div>
       </div>
       <div class="dashboard-grid">
         <div class="card small-card">
@@ -100,6 +111,16 @@
           <h3>Attendance</h3>
           <p>View the latest attendance and create new entries.</p>
         </div>
+      </div>
+      <div id="parent-area" class="card hidden">
+        <h3>Parent dashboard</h3>
+        <p>View linked students and open student reports for attendance and grades.</p>
+        <div id="my-students-list"></div>
+      </div>
+      <div id="student-area" class="card hidden">
+        <h3>Student summary</h3>
+        <div id="student-attendance"></div>
+        <div id="student-grades"></div>
       </div>
     </section>
 
@@ -146,7 +167,13 @@
 
     <section class="page hidden" id="page-enrollments">
       <div class="card" id="enrollments-section">
-        <h2>Enrollments</h2>
+        <div class="page-header">
+          <img src="images/classes.svg" alt="Enrollments" />
+          <div>
+            <h2>Enrollments</h2>
+            <p>Assign students to classes with confidence. Teachers and admins can review enrollment details instantly.</p>
+          </div>
+        </div>
         <form id="enrollment-form">
           <select name="student_id" id="student-select"></select>
           <select name="class_id" id="class-select"></select>
