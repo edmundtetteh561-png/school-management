@@ -1,13 +1,13 @@
 body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
-  background: radial-gradient(circle at top left, #eff6ff 0%, #f8fafc 45%, #e2e8f0 100%);
-  color: #0f172a;
+  background: radial-gradient(circle at top left, #eef2f5 0%, #f4f6f8 45%, #e1e5ea 100%);
+  color: #1f2937;
 }
 
 header {
-  background: linear-gradient(135deg, #102a43 0%, #1e40af 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #24303f 0%, #334155 100%);
+  color: #f8fafc;
   padding: 28px 16px;
 }
 
@@ -49,8 +49,8 @@ header p {
 }
 
 .site-nav a {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.16);
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.12);
   padding: 12px 20px;
   border-radius: 999px;
   text-decoration: none;
@@ -63,7 +63,7 @@ header p {
 .site-nav a:hover,
 .site-nav a:focus,
 .site-nav a.active {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
 }
 
@@ -116,9 +116,9 @@ main {
 }
 
 .card {
-  background: #ffffff;
+  background: #f8fafc;
   border-radius: 18px;
-  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
   padding: 24px;
 }
 
@@ -152,7 +152,7 @@ button:focus {
 }
 
 button {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border-color: transparent;
   cursor: pointer;
@@ -160,7 +160,7 @@ button {
 }
 
 button:hover {
-  opacity: 0.95;
+  opacity: 0.92;
   transform: translateY(-1px);
 }
 
@@ -206,9 +206,9 @@ th {
 }
 
 .note {
-  background: #eef2ff;
+  background: #e2e8f0;
   border: 1px solid #cbd5e1;
-  color: #0f172a;
+  color: #1f2937;
   padding: 16px;
   border-radius: 14px;
 }
