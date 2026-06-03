@@ -98,43 +98,39 @@ db.serialize(() => {
     });
   });
 
-  const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
-  if (defaultAdminPassword) {
-    const defaultAdmin = {
-      username: 'admin',
-      password: defaultAdminPassword,
-      role: 'admin'
-    };
+  const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123';
+  const defaultAdmin = {
+    username: 'admin',
+    password: defaultAdminPassword,
+    role: 'admin'
+  };
 
-    db.get('SELECT id FROM users WHERE username = ?', [defaultAdmin.username], (err, row) => {
-      if (err) {
-        console.error('Could not query users table', err.message);
-        return;
-      }
+  db.get('SELECT id FROM users WHERE username = ?', [defaultAdmin.username], (err, row) => {
+    if (err) {
+      console.error('Could not query users table', err.message);
+      return;
+    }
 
-      if (!row) {
-        const bcrypt = require('bcryptjs');
-        bcrypt.hash(defaultAdmin.password, 10, (hashErr, hash) => {
-          if (hashErr) {
-            console.error('Could not create admin user', hashErr.message);
-            return;
-          }
+    if (!row) {
+      const bcrypt = require('bcryptjs');
+      bcrypt.hash(defaultAdmin.password, 10, (hashErr, hash) => {
+        if (hashErr) {
+          console.error('Could not create admin user', hashErr.message);
+          return;
+        }
 
-          db.run(
-            'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
-            [defaultAdmin.username, hash, defaultAdmin.role],
-            (insertErr) => {
-              if (insertErr) {
-                console.error('Could not insert default admin user', insertErr.message);
-              }
+        db.run(
+          'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
+          [defaultAdmin.username, hash, defaultAdmin.role],
+          (insertErr) => {
+            if (insertErr) {
+              console.error('Could not insert default admin user', insertErr.message);
             }
-          );
-        });
-      }
-    });
-  } else {
-    console.warn('DEFAULT_ADMIN_PASSWORD is not set. No default admin user will be created automatically.');
-  }
+          }
+        );
+      });
+    }
+  });
 });
 
 module.exports = db;
