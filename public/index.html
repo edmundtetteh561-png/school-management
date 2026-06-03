@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>School Management</title>
-  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="app.css?v=2" />
 </head>
 <body>
   <header>
@@ -179,6 +179,7 @@
           <select name="class_id" id="class-select"></select>
           <button type="submit">Enroll Student</button>
         </form>
+        <p class="hint">Select a student and a class, then click "Enroll Student". Existing enrollments appear below, and admins can edit or delete them directly from the table.</p>
         <div id="enrollments-list"></div>
       </div>
     </section>
@@ -254,7 +255,7 @@
       </div>
     </section>
   </main>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 
   <div id="student-modal" class="modal hidden" role="dialog" aria-hidden="true">
     <div class="modal-backdrop"></div>
