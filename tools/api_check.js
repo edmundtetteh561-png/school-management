@@ -39,9 +39,12 @@ function request(method, path, data, token){
 
 (async function(){
   try {
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+    if (!adminPassword) throw new Error('Set DEFAULT_ADMIN_PASSWORD before running api_check.');
+
     const results = { steps: [] };
     results.steps.push({ name: 'login' });
-    const login = await request('POST','/api/login',{ username: 'admin', password: 'admin123' });
+    const login = await request('POST','/api/login',{ username: 'admin', password: adminPassword });
     results.steps[results.steps.length-1].status = login.status;
     results.steps[results.steps.length-1].body = login.body;
     const token = login.body && login.body.token;

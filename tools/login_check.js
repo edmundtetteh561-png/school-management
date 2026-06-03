@@ -1,5 +1,10 @@
 const http = require('http');
-const data = JSON.stringify({ username: 'admin', password: 'admin123' });
+const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+if (!adminPassword) {
+  console.error('Set DEFAULT_ADMIN_PASSWORD before running login_check.');
+  process.exit(1);
+}
+const data = JSON.stringify({ username: 'admin', password: adminPassword });
 const options = {
   hostname: 'localhost',
   port: 3000,

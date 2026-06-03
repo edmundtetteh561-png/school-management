@@ -4,7 +4,7 @@
 
 - Default admin account:
   - Username: `admin`
-  - Password: `admin123`
+  - Password is not shown here for security reasons.
 
 ## Roles
 

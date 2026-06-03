@@ -1,4 +1,4 @@
-const path = require('path');
+﻿const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS students (
   last_name TEXT NOT NULL,
   grade TEXT
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS teachers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   subject TEXT
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS classes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS classes (
   room TEXT,
   FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS enrollments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   student_id INTEGER NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
   FOREIGN KEY (student_id) REFERENCES students(id),
   FOREIGN KEY (class_id) REFERENCES classes(id)
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS attendance (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   student_id INTEGER NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS attendance (
   FOREIGN KEY (student_id) REFERENCES students(id),
   FOREIGN KEY (class_id) REFERENCES classes(id)
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS grades (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   student_id INTEGER NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS grades (
   FOREIGN KEY (student_id) REFERENCES students(id),
   FOREIGN KEY (class_id) REFERENCES classes(id)
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS users (
   FOREIGN KEY (teacher_id) REFERENCES teachers(id),
   FOREIGN KEY (student_id) REFERENCES students(id)
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS parent_students (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   parent_user_id INTEGER NOT NULL,
@@ -98,38 +98,43 @@ db.serialize(() => {
     });
   });
 
-  const defaultAdmin = {
-    username: 'admin',
-    password: 'admin123',
-    role: 'admin'
-  };
+  const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+  if (defaultAdminPassword) {
+    const defaultAdmin = {
+      username: 'admin',
+      password: defaultAdminPassword,
+      role: 'admin'
+    };
 
-  db.get('SELECT id FROM users WHERE username = ?', [defaultAdmin.username], (err, row) => {
-    if (err) {
-      console.error('Could not query users table', err.message);
-      return;
-    }
+    db.get('SELECT id FROM users WHERE username = ?', [defaultAdmin.username], (err, row) => {
+      if (err) {
+        console.error('Could not query users table', err.message);
+        return;
+      }
 
-    if (!row) {
-      const bcrypt = require('bcryptjs');
-      bcrypt.hash(defaultAdmin.password, 10, (hashErr, hash) => {
-        if (hashErr) {
-          console.error('Could not create admin user', hashErr.message);
-          return;
-        }
-
-        db.run(
-          'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
-          [defaultAdmin.username, hash, defaultAdmin.role],
-          (insertErr) => {
-            if (insertErr) {
-              console.error('Could not insert default admin user', insertErr.message);
-            }
+      if (!row) {
+        const bcrypt = require('bcryptjs');
+        bcrypt.hash(defaultAdmin.password, 10, (hashErr, hash) => {
+          if (hashErr) {
+            console.error('Could not create admin user', hashErr.message);
+            return;
           }
-        );
-      });
-    }
-  });
+
+          db.run(
+            'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
+            [defaultAdmin.username, hash, defaultAdmin.role],
+            (insertErr) => {
+              if (insertErr) {
+                console.error('Could not insert default admin user', insertErr.message);
+              }
+            }
+          );
+        });
+      }
+    });
+  } else {
+    console.warn('DEFAULT_ADMIN_PASSWORD is not set. No default admin user will be created automatically.');
+  }
 });
 
 module.exports = db;

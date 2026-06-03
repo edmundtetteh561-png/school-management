@@ -35,7 +35,8 @@ http://localhost:3000
 ## Login
 
 - Default admin user: `admin`
-- Default password: `admin123`
+- Default password is configured through the `DEFAULT_ADMIN_PASSWORD` environment variable.
+- For local development, supply `DEFAULT_ADMIN_PASSWORD` before first run to initialize the admin account.
 
 ## Import/Export
 

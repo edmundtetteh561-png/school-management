@@ -89,10 +89,13 @@ async function waitForStatus() {
     assert.strictEqual(statusRes.status, 200, 'Status endpoint should return 200');
     console.log('Status endpoint OK');
 
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+    if (!adminPassword) throw new Error('Set DEFAULT_ADMIN_PASSWORD before running API tests.');
+
     const loginRes = await request(
       '/api/login',
       'POST',
-      JSON.stringify({ username: 'admin', password: 'admin123' }),
+      JSON.stringify({ username: 'admin', password: adminPassword }),
       { 'Content-Type': 'application/json' }
     );
     assert.strictEqual(loginRes.status, 200, 'Login should return 200');
