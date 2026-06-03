@@ -138,6 +138,51 @@ function renderLists() {
     addEditButtons('grades-list', openEditGradeModal, 'grades');
   }
 
+  // Ensure action headers and guidance exist for admin/teacher roles
+  (function ensureActionHints() {
+    const role = state.auth.role;
+    if (!(role === 'admin' || role === 'teacher')) return;
+    const lists = ['attendance-list', 'grades-list', 'students-list', 'teachers-list', 'enrollments-list'];
+    lists.forEach((id) => {
+      const container = document.getElementById(id);
+      if (!container) return;
+      const table = container.querySelector('table');
+      const hintId = `${id}-empty-hint`;
+
+      // Remove stale hint if table now exists
+      const existingHint = document.getElementById(hintId);
+      if (table) {
+        if (existingHint) existingHint.remove();
+
+        const theadRow = table.querySelector('thead tr');
+        if (theadRow && !theadRow.querySelector('.actions-th')) {
+          const th = document.createElement('th');
+          th.textContent = 'Actions';
+          th.className = 'actions-th';
+          theadRow.appendChild(th);
+        }
+
+        // Ensure each row has a placeholder cell for actions so layout is consistent
+        table.querySelectorAll('tbody tr').forEach((tr) => {
+          if (!tr.querySelector('td.actions-td')) {
+            const td = document.createElement('td');
+            td.className = 'actions-td';
+            tr.appendChild(td);
+          }
+        });
+      } else {
+        // If no records yet, show a small hint so users know edit/delete will appear
+        if (!existingHint) {
+          const p = document.createElement('p');
+          p.id = hintId;
+          p.className = 'hint';
+          p.textContent = 'No records yet. Add entries to enable Edit/Delete controls here.';
+          container.appendChild(p);
+        }
+      }
+    });
+  })();
+
   // render parent-specific simple list for parents
   const myStudentsEl = document.getElementById('my-students-list');
   if (myStudentsEl) {
